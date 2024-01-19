@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alteração de Background</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            transition: background-image 0.5s ease-in-out;
+            display: flex;
+        }
+
+        .imagem {
+            flex-grow: 1;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .conteudo-lateral {
+            width: 300px;
+            background-color: #34185C;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conteudo-lateral img {
+            margin: 30px 10px 50px 10px;
+            width: 280px;
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="imagem">
+
+    </div>
+
+    <div class="conteudo-lateral">
+        <img src="logo.png" alt="Imagem Fixada" />
+    </div>
+
+    <script>
+        let numeroImagem = 0;
+        let listaDeImagens = [];
+
+        async function obterListaDeImagens() {
+            const response = await fetch('imgs/');
+            const data = await response.text();
+
+            const parser = new DOMParser();
+            const htmlDocument = parser.parseFromString(data, 'text/html');
+            const listaDeArquivos = Array.from(htmlDocument.querySelectorAll('a')).map(link => link.href);
+
+            listaDeImagens = listaDeArquivos
+                .filter(link => /\.(jpg|jpeg|png|gif|webp|jfif)$/i.test(link))
+                .map(link => link.replace(/^.*[\\\/]/, ''));
+
+            return listaDeImagens.length;
+        }
+
+        async function iniciarScript() {
+            const numeroMaximo = await obterListaDeImagens();
+            console.log('Número total de arquivos na pasta:', numeroMaximo);
+
+            function alterarBackground() {
+                document.querySelector('.imagem').style.backgroundImage = `url('imgs/${listaDeImagens[numeroImagem]}')`;
+                numeroImagem++;
+
+                if (numeroImagem >= numeroMaximo) {
+                    numeroImagem = 0;
+                }
+            }
+
+            alterarBackground();
+            const intervalo = setInterval(alterarBackground, 3000);
+        }
+
+        iniciarScript();
+    </script>
+</body>
+
+</html>
